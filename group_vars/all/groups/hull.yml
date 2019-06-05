@@ -1,0 +1,6 @@
+---
+group_hull:
+  state: active
+  hosting: "web-01"
+  web: "redirect"
+  target: "http://www.thisishull.net/"

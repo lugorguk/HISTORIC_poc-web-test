@@ -1,0 +1,6 @@
+---
+group_durham:
+  state: active
+  hosting: "web-01"
+  web: "redirect"
+  target: "http://www.nelug.org.uk"

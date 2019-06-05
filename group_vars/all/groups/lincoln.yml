@@ -1,0 +1,6 @@
+---
+group_lincoln:
+  state: active
+  hosting: "snm"
+  web: "redirect"
+  target: "https://lincolnlug.org.uk/"

@@ -1,0 +1,5 @@
+---
+group_armedforces:
+  state: active
+  hosting: "snm"
+  web: "static"

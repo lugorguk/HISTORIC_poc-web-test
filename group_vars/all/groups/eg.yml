@@ -1,0 +1,5 @@
+---
+group_eg:
+  state: active
+  hosting: "snm"
+  web: "dokuwiki"

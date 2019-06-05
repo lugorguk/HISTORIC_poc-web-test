@@ -1,0 +1,5 @@
+---
+group_bedford:
+  state: active
+  hosting: "snm"
+  web: "static"

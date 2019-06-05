@@ -1,0 +1,5 @@
+---
+group_leicester:
+  state: active
+  hosting: "web-01"
+  web: "static"

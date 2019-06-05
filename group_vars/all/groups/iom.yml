@@ -1,0 +1,5 @@
+---
+group_iom:
+  state: active
+  hosting: "snm"
+  web: "static"

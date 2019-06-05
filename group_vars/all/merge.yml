@@ -1,0 +1,23 @@
+---
+lug_groups: |
+  {
+    {%- for var in vars | dict2items -%}
+      {%- if var.key | regex_search('^group_') is not none
+        and (
+          var.value | type_debug == "dict"
+          or var.value | type_debug == "AnsibleMapping"
+        ) -%}
+        "{{ var.key | regex_replace('^group_', '') }}": {
+          {%- if lugmasters[var.key | regex_replace('^group_', '')] is defined -%}
+            "admins": {{ lugmasters[var.key | regex_replace('^group_', '')] }},
+          {%- endif -%}
+          {%- for item in var.value | dict2items -%}
+            "{{ item.key }}":
+            {%- if item.value | type_debug not in ['dict', 'list'] -%}"{%- endif -%}
+              {{ item.value }}
+            {%- if item.value | type_debug not in ['dict', 'list'] -%}"{%- endif -%},
+          {%- endfor -%}
+        },
+      {%- endif -%}
+    {%- endfor -%}
+  }

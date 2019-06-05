@@ -1,0 +1,6 @@
+---
+group_blackpool:
+  state: active
+  hosting: "web-01"
+  web: "redirect"
+  target: "https://blackpoolmakerspace.wordpress.com/"

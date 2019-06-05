@@ -1,0 +1,5 @@
+---
+group_tyneside:
+  state: active
+  hosting: "snm"
+  web: "dokuwiki"

@@ -1,0 +1,6 @@
+---
+group_chelmer:
+  state: active
+  hosting: "snm"
+  web: "redirect"
+  target: "https://www.linkedin.com/groups/3963756/profile"

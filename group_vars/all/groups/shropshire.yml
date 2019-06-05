@@ -1,0 +1,6 @@
+---
+group_shropshire:
+  state: active
+  hosting: "web-01"
+  web: "redirect"
+  target: "http://shropshirelug.wordpress.com/"

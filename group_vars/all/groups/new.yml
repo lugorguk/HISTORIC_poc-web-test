@@ -1,0 +1,5 @@
+---
+group_new:
+  state: active
+  hosting: "web-01"
+  web: "static"

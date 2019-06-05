@@ -1,0 +1,5 @@
+---
+group_mk:
+  state: active
+  hosting: "snm"
+  web: "static"

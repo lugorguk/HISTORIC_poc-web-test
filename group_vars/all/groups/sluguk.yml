@@ -1,0 +1,6 @@
+---
+group_sluguk:
+  state: active
+  hosting: "web-01"
+  web: "redirect"
+  target: "http://www.btinternet.com/~homebrew/sluguk/"

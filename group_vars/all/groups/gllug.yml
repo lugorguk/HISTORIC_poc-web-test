@@ -1,0 +1,6 @@
+---
+group_gllug:
+  state: active
+  hosting: "snm"
+  web: "redirect"
+  target: "http://gllug.org.uk"

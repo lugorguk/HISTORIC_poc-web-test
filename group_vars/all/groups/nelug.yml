@@ -1,0 +1,6 @@
+---
+group_nelug:
+  state: active
+  hosting: "web-01"
+  web: "redirect"
+  target: "http://www.nelug.org.uk"

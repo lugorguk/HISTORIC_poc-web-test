@@ -1,0 +1,6 @@
+---
+group_glastonbury:
+  state: active
+  hosting: "web-01"
+  web: "redirect"
+  target: "http://lugog.org.uk/"

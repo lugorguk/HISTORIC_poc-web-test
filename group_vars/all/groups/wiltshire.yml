@@ -1,0 +1,5 @@
+---
+group_wiltshire:
+  state: active
+  hosting: "snm"
+  web: "static"

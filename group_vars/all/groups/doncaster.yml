@@ -1,0 +1,6 @@
+---
+group_doncaster:
+  state: active
+  hosting: "web-01"
+  web: "redirect"
+  target: "http://www.scundog.org/"

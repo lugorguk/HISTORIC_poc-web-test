@@ -1,0 +1,5 @@
+---
+group_hereford:
+  state: active
+  hosting: "snm"
+  web: "dokuwiki"

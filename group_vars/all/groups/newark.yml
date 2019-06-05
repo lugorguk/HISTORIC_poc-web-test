@@ -1,0 +1,6 @@
+---
+group_newark:
+  state: active
+  hosting: "snm"
+  web: "redirect"
+  target: "https://www.facebook.com/groups/284465954978157/"

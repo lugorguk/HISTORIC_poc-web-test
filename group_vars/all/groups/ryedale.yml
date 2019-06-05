@@ -1,0 +1,5 @@
+---
+group_ryedale:
+  state: active
+  hosting: "snm"
+  web: "static"

@@ -1,0 +1,6 @@
+---
+group_euslug:
+  state: active
+  hosting: "web-01"
+  web: "redirect"
+  target: "http://slug.urgusabic.net"

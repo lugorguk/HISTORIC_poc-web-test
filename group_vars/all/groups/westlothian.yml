@@ -1,0 +1,6 @@
+---
+group_westlothian:
+  state: active
+  hosting: "web-01"
+  web: "redirect"
+  target: "http://westlothianlug.org.uk/"

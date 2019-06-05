@@ -1,0 +1,6 @@
+---
+group_bradford:
+  state: active
+  hosting: "snm"
+  web: "redirect"
+  target: "http://bradlug.co.uk"

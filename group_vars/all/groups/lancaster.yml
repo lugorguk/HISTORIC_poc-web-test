@@ -1,0 +1,6 @@
+---
+group_lancaster:
+  state: active
+  hosting: "web-01"
+  web: "redirect"
+  target: "http://lancasterlug.org.uk/"

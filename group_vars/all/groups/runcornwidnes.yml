@@ -1,0 +1,4 @@
+---
+group_runcornwidnes:
+  state: inactive
+  hosting: "snm"

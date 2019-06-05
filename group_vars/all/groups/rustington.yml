@@ -1,0 +1,5 @@
+---
+group_rustington:
+  state: active
+  hosting: "web-01"
+  web: "php"

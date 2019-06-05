@@ -1,0 +1,6 @@
+---
+group_livlug:
+  state: active
+  hosting: "snm"
+  web: "redirect"
+  target: "http://www.livlug.org.uk/"
