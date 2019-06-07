@@ -8,10 +8,17 @@ Vagrant.configure("2") do |config|
 
   config.vm.box_check_update = false
 
+  # Set the box up vaguely close to lug.org.uk "live"
+  config.vm.provision "ansible_local" do |ansible|
+    ansible.playbook            = "prepare.yml"
+    ansible.install_mode        = :pip
+  end
+
   config.vm.provision "ansible_local", run: "always" do |ansible|
     ansible.playbook            = "site.yml"
     ansible.install_mode        = :pip
 #    ansible.vault_password_file = "Vault-Password"
+###  Only required when we start using Vault to hide SSH keys and users ###
   end
 
 #  config.vm.define :admin do |admin|

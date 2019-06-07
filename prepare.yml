@@ -1,0 +1,20 @@
+---
+- hosts: web-01,snm,localhost
+  become: true
+  tasks:
+  - name: Update OS
+    apt:
+      update_cache: yes
+      upgrade: full
+      autoremove: yes
+      autoclean: yes
+
+  - name: Install Web Server Packages
+    apt:
+      name: ['apache2', 'python3-certbot-apache']
+      state: present
+
+  - name: Ensure rewrite module is loaded in apache
+    apache2_module:
+      name: rewrite
+      state: present
