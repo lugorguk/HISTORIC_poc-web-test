@@ -68,13 +68,27 @@
       group: "root"
       mode: '0755'
 
-  - name: Create apache2 static
+  - name: Create apache2 site-available
     template:
       dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
       src: "templates/{{ item.value.web }}.j2"
       owner: root
       group: root
       mode: 0755
+    notify:
+    - Restart Apache
+    loop: "{{ lug_groups|dict2items }}"
+    loop_control:
+      label: "{{ item.key }}"
+    when:
+    - item.value.web == 'static'
+    - item.value.hosting == ansible_hostname
+
+  - name: Create symlinks from site-available to site-enabled
+    file:
+      src: "../sites-available/{{ item.key }}.conf"
+      dest: "/etc/apache2/sites-enabled/{{ item.key }}.conf"
+      state: link
     notify:
     - Restart Apache
     loop: "{{ lug_groups|dict2items }}"
