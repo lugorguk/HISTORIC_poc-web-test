@@ -11,6 +11,19 @@ lug_groups: |
           {%- if lugmasters[var.key | regex_replace('^group_', '')] is defined -%}
             "admins": {{ lugmasters[var.key | regex_replace('^group_', '')] }},
           {%- endif -%}
+          {%- if var.value.state is not defined %}"state": "error",{% endif -%}
+          {%- if var.value.hosting is not defined %}"hosting": "snm",{% endif -%}
+          {%- if var.value.web is not defined %}"web": "static",{% endif -%}
+          {%- if var.value.preferred_domain is not defined %}"preferred_domain": "{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lug.org.uk",{% endif -%}
+          {%- if var.value.serveralias is not defined -%}
+            "serveralias": [
+              "www.{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lug.org.uk",
+              "{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.glug.org.uk",
+              "www.{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.glug.org.uk",
+              "{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lugs.org.uk",
+              "www.{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lugs.org.uk",
+            ],
+          {%- endif -%}
           {%- for item in var.value | dict2items -%}
             "{{ item.key }}":
             {%- if item.value | type_debug not in ['dict', 'list'] -%}"{%- endif -%}

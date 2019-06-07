@@ -3,3 +3,5 @@ group_armedforces:
   state: active
   hosting: "snm"
   web: "static"
+  preferred_domain: armedforces.glug.org.uk
+#  https: yes

@@ -1,0 +1,46 @@
+  # Content
+  DocumentRoot /home/groups/{{ item.key }}/public_html
+  <Directory /home/groups/{{ item.key }}/public_html>
+    Order allow,deny
+    Allow from all
+    Require all granted
+    Options -Indexes
+    Options +FollowSymLinks
+  </Directory>
+
+  # LetsEncrypt
+  Alias /.well-known/acme-challenge/ "/var/www/acme/"
+  <Directory "/var/www/acme/">
+    AllowOverride None
+    Options MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec
+    Require method GET POST OPTIONS
+  </Directory>
+
+  # Addressing
+  ServerName {{ item.value.preferred_domain | default(item.key + '.lug.org.uk') }}
+{% if item.value.serveralias is defined %}
+  RewriteEngine on
+  RewriteRule ^.well-known/acme-challenge($|/) - [L]
+{% if item.value.serveralias | type_debug == 'list' %}
+{% for alias in item.value.serveralias %}
+  RewriteCond %{SERVER_NAME} ={{ alias }}{% if not loop.last %} [OR]{% endif %}
+
+{% endfor %}
+  RewriteRule ^ http{% if item.value.https | default(false) | bool %}s{% endif %}://{{ item.value.preferred_domain }}%{REQUEST_URI} [END,QSA,R=permanent]
+  ServerAlias{% for alias in item.value.serveralias %} {{ alias }}{% endfor %}
+{% else %}
+  RewriteCond %{SERVER_NAME} ={{ item.value.serveralias }}
+  RewriteRule ^ http{% if item.value.https | default(false) | bool %}s{% endif %}://{{ item.value.preferred_domain }}%{REQUEST_URI} [END,QSA,R=permanent]
+  ServerAlias {{ item.value.serveralias }}
+{% endif %}
+{% endif %}
+
+  # Contact
+  ServerAdmin {{ item.value.serveradmin | default('admin@lug.org.uk') }}
+
+  # Logging
+  LogLevel warn
+  ErrorLog /var/log/apache2/{{ item.value.preferred_domain }}-http-error.log
+  CustomLog /var/log/apache2/{{ item.value.preferred_domain }}-http-access.log combined
+  ServerSignature Off
+

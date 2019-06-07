@@ -1,0 +1,85 @@
+---
+- hosts: web-01,snm,localhost
+  become: true
+  handlers:
+  - name: Restart Apache
+    systemd:
+      name: apache2
+      state: restarted
+  tasks:
+  - name: Read Group list
+    getent:
+      database: group
+      split: ':'
+    register: ge_groups
+
+  - name: Read Users list
+    getent:
+      database: passwd
+    register: ge_users
+
+  - name: Update OS
+    apt:
+      update_cache: yes
+      upgrade: full
+      autoremove: yes
+      autoclean: yes
+
+  - name: Install Web Server Packages
+    apt:
+      name: ['apache2', 'python3-certbot-apache']
+      state: present
+
+  - name: Ensure rewrite module is loaded in apache
+    apache2_module:
+      name: rewrite
+      state: present
+
+  - name: Create missing group groups
+    group:
+      name: "{{ item.key }}"
+      state: present
+    loop: "{{ lug_groups|dict2items }}"
+    loop_control:
+      label: "{{ item.key }}"
+    when:
+    - item.value.hosting == ansible_hostname
+    - ge_groups.ansible_facts.getent_group[item.key] is not defined
+
+  - name: Create missing group users
+    user:
+      name: "{{ item.key }}"
+      comment: "{{ item.value.lug_name | default(item.key + ' LUG') }},,,"
+      group: "{{ item.key }}"
+      shell: /bin/bash
+      state: present
+    loop: "{{ lug_groups|dict2items }}"
+    loop_control:
+      label: "{{ item.key }}"
+    when:
+    - item.value.hosting == ansible_hostname
+    - ge_users.ansible_facts.getent_passwd[item.key] is not defined
+
+  - name: Create LetsEncrypt web directory
+    file:
+      path: "/var/www/acme"
+      state: directory
+      owner: "root"
+      group: "root"
+      mode: '0755'
+
+  - name: Create apache2 static
+    template:
+      dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
+      src: templates/static.j2
+      owner: root
+      group: root
+      mode: 0755
+    notify:
+    - Restart Apache
+    loop: "{{ lug_groups|dict2items }}"
+    loop_control:
+      label: "{{ item.key }}"
+    when:
+    - item.value.web == 'static'
+    - item.value.hosting == ansible_hostname
