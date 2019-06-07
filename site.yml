@@ -49,7 +49,7 @@
   - name: Create missing group users
     user:
       name: "{{ item.key }}"
-      comment: "{{ item.value.lug_name | default(item.key + ' LUG') }},,,"
+      comment: "{{ item.value.group_name | default(item.key + ' LUG') }},,,"
       group: "{{ item.key }}"
       shell: /bin/bash
       state: present
@@ -71,7 +71,7 @@
   - name: Create apache2 static
     template:
       dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
-      src: templates/static.j2
+      src: "templates/{{ item.value.web }}.j2"
       owner: root
       group: root
       mode: 0755
