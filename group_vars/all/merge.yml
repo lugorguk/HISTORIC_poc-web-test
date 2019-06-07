@@ -17,11 +17,24 @@ lug_groups: |
           {%- if var.value.preferred_domain is not defined %}"preferred_domain": "{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lug.org.uk",{% endif -%}
           {%- if var.value.serveralias is not defined -%}
             "serveralias": [
+              {% if var.value.preferred_domain | default('') != (var.value.dns_key | default(var.key | regex_replace('^group_', ''))) + '.lug.org.uk' %}
+              "{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lug.org.uk",
+              {% endif %}
+              {% if var.value.preferred_domain | default('') != 'www.' + (var.value.dns_key | default(var.key | regex_replace('^group_', ''))) + '.lug.org.uk' %}
               "www.{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lug.org.uk",
+              {% endif %}
+              {% if var.value.preferred_domain | default('') != (var.value.dns_key | default(var.key | regex_replace('^group_', ''))) + '.glug.org.uk' %}
               "{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.glug.org.uk",
+              {% endif %}
+              {% if var.value.preferred_domain | default('') != 'www.' + (var.value.dns_key | default(var.key | regex_replace('^group_', ''))) + '.glug.org.uk' %}
               "www.{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.glug.org.uk",
+              {% endif %}
+              {% if var.value.preferred_domain | default('') != (var.value.dns_key | default(var.key | regex_replace('^group_', ''))) + '.lugs.org.uk' %}
               "{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lugs.org.uk",
+              {% endif %}
+              {% if var.value.preferred_domain | default('') != 'www.' + (var.value.dns_key | default(var.key | regex_replace('^group_', ''))) + '.lugs.org.uk' %}
               "www.{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lugs.org.uk",
+              {% endif %}
             ],
           {%- endif -%}
           {%- for item in var.value | dict2items -%}
