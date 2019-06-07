@@ -1,0 +1,22 @@
+---
+users:
+  dave:
+    user: dave
+    name: Dave Smith
+    ssh_public_keys:
+    - ssh-rsa ...TBC dave@desktop
+  bob:
+    user: bob
+    name: Bob Jones
+admins:
+  jon:
+    user: jon
+    name: Jon Spriggs
+    ssh_public_keys:
+    - ssh-rsa ...TBC jon@laptop
+
+lugmasters:
+  worcs:
+  - "{{ admins.jon }}"
+  - "{{ users.dave }}"
+  - "{{ users.bob }}"
