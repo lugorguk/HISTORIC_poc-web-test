@@ -1,5 +1,5 @@
 ---
 group_worcs:
-  state: inactive
+  web: inactive
   hosting: "snm"
   group_name: Worcester LUG

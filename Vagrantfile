@@ -6,8 +6,6 @@ Vagrant.configure("2") do |config|
   # Install with
   #   vagrant plugin install vagrant-cachier
 
-  config.vm.box_check_update = false
-
   # Set the box up vaguely close to lug.org.uk "live"
   config.vm.provision "ansible_local" do |ansible|
     ansible.playbook            = "prepare.yml"

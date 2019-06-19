@@ -1,0 +1,9 @@
+  # LetsEncrypt
+  RewriteRule ^.well-known/acme-challenge($|/) - [L]
+  Alias /.well-known/acme-challenge/ "/var/www/acme/"
+  <Directory "/var/www/acme/">
+    AllowOverride None
+    Options MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec
+    Require method GET POST OPTIONS
+  </Directory>
+

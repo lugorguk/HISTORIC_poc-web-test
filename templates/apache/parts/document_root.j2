@@ -1,0 +1,9 @@
+  DocumentRoot /home/groups/{{ item.key }}/public_html
+  <Directory /home/groups/{{ item.key }}/public_html>
+    Order allow,deny
+    Allow from all
+    Require all granted
+    Options -Indexes
+    Options +FollowSymLinks
+  </Directory>
+

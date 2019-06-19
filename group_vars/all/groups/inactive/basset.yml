@@ -1,4 +1,4 @@
 ---
 group_basset:
-  state: inactive
+  web: inactive
   hosting: "web-01"

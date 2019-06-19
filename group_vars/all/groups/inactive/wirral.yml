@@ -1,4 +1,4 @@
 ---
 group_wirral:
-  state: inactive
+  web: inactive
   hosting: "snm"

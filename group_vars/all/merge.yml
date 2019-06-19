@@ -7,41 +7,52 @@ lug_groups: |
           var.value | type_debug == "dict"
           or var.value | type_debug == "AnsibleMapping"
         ) -%}
-        "{{ var.key | regex_replace('^group_', '') }}": {
-          {%- if lugmasters[var.key | regex_replace('^group_', '')] is defined -%}
-            "admins": {{ lugmasters[var.key | regex_replace('^group_', '')] }},
+        {%- set group_name = var.key | regex_replace('^group_', '') -%}
+        {%- set preferred_domain = var.value.preferred_domain | default((var.value.dns_key | default(group_name)) + '.lug.org.uk') -%}
+        "{{ group_name }}": {
+
+          "preferred_domain": "{{ preferred_domain }}",
+
+          {%- if lugmasters[group_name] is defined -%}
+            "admins": {{ lugmasters[group_name] }},
           {%- endif -%}
-          {%- if var.value.state is not defined %}"state": "error",{% endif -%}
-          {%- if var.value.hosting is not defined %}"hosting": "snm",{% endif -%}
-          {%- if var.value.web is not defined %}"web": "static",{% endif -%}
-          {%- if var.value.preferred_domain is not defined %}"preferred_domain": "{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lug.org.uk",{% endif -%}
+
+          {%- if var.value.state is not defined -%}
+            "state": "error",
+          {%- endif -%}
+
+          {%- if var.value.hosting is not defined -%}
+            "hosting": "snm",
+          {%- endif -%}
+
+          {%- if var.value.web is not defined -%}
+            "web": "static",
+          {%- endif -%}
+
           {%- if var.value.serveralias is not defined -%}
             "serveralias": [
-              {% if var.value.preferred_domain | default('') != (var.value.dns_key | default(var.key | regex_replace('^group_', ''))) + '.lug.org.uk' %}
-              "{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lug.org.uk",
-              {% endif %}
-              {% if var.value.preferred_domain | default('') != 'www.' + (var.value.dns_key | default(var.key | regex_replace('^group_', ''))) + '.lug.org.uk' %}
-              "www.{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lug.org.uk",
-              {% endif %}
-              {% if var.value.preferred_domain | default('') != (var.value.dns_key | default(var.key | regex_replace('^group_', ''))) + '.glug.org.uk' %}
-              "{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.glug.org.uk",
-              {% endif %}
-              {% if var.value.preferred_domain | default('') != 'www.' + (var.value.dns_key | default(var.key | regex_replace('^group_', ''))) + '.glug.org.uk' %}
-              "www.{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.glug.org.uk",
-              {% endif %}
-              {% if var.value.preferred_domain | default('') != (var.value.dns_key | default(var.key | regex_replace('^group_', ''))) + '.lugs.org.uk' %}
-              "{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lugs.org.uk",
-              {% endif %}
-              {% if var.value.preferred_domain | default('') != 'www.' + (var.value.dns_key | default(var.key | regex_replace('^group_', ''))) + '.lugs.org.uk' %}
-              "www.{{ var.value.dns_key | default(var.key | regex_replace('^group_', '')) }}.lugs.org.uk",
-              {% endif %}
+              {%- for suffix in ['.lug.org.uk','.glug.org.uk','.lugs.org.uk'] -%}
+                {%- if preferred_domain | regex_search(group_name + suffix) is none -%}
+                  "{{ group_name }}{{ suffix }}",
+                  "www.{{ group_name }}{{ suffix }}",
+                {%- else -%}
+                  {%- if preferred_domain | regex_search('www.' + group_name + suffix) is none -%}
+                    "www.{{ group_name }}{{ suffix }}",
+                  {%- else -%}
+                    "{{ group_name }}{{ suffix }}",
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
             ],
           {%- endif -%}
+
           {%- for item in var.value | dict2items -%}
-            "{{ item.key }}":
-            {%- if item.value | type_debug not in ['dict', 'list'] -%}"{%- endif -%}
-              {{ item.value }}
-            {%- if item.value | type_debug not in ['dict', 'list'] -%}"{%- endif -%},
+            {%- if item.key != 'preferred_domain' -%}
+              "{{ item.key }}":
+              {%- if item.value | type_debug not in ['dict', 'list'] -%}"{%- endif -%}
+                {{ item.value }}
+              {%- if item.value | type_debug not in ['dict', 'list'] -%}"{%- endif -%},
+            {%- endif -%}
           {%- endfor -%}
         },
       {%- endif -%}
