@@ -2,18 +2,24 @@
 {# https://community.letsencrypt.org/t/alias-for-well-known-acme-challenge/44818 #}
 {# http://www.ckollars.org/apache-rewrite-htaccess.html#precedence #}
 
+  RewriteCond %{REQUEST_URI} !^/.well-known/acme-challenge [NC]
+  RewriteCond %{SERVER_NAME} ={{ item.value.preferred_domain }}
+  RewriteRule ^ {{ item.value.target }}%{REQUEST_URI} [END,QSA,R]
+
 {% if item.value.serveralias is defined %}
   # Rewrites from Aliases to preferred DNS name
 {% if item.value.serveralias | type_debug == 'list' %}
 {% for alias in item.value.serveralias %}
   RewriteCond %{REQUEST_URI} !^/.well-known/acme-challenge [NC]
   RewriteCond %{SERVER_NAME} ={{ alias }}
-  RewriteRule ^ http{% if item.value.https | default(false) | bool %}s{% endif %}://{{ item.value.preferred_domain }}%{REQUEST_URI} [END,QSA,R]
+  RewriteRule ^ {{ item.value.target }}%{REQUEST_URI} [END,QSA,R]
 
 {% endfor %}
 {% else %}
   RewriteCond %{REQUEST_URI} !^/.well-known/acme-challenge [NC]
   RewriteCond %{SERVER_NAME} ={{ item.value.serveralias }}
-  RewriteRule ^ http{% if item.value.https | default(false) | bool %}s{% endif %}://{{ item.value.preferred_domain }}%{REQUEST_URI} [END,QSA,R]
+  RewriteRule ^ {{ item.value.target }}%{REQUEST_URI} [END,QSA,R]
+
 {% endif %}
 {% endif %}
+

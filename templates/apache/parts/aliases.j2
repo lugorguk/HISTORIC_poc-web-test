@@ -1,0 +1,7 @@
+{% if item.value.serveralias is defined %}
+{% if item.value.serveralias | type_debug == 'list' %}
+  ServerAlias{% for alias in item.value.serveralias %} {{ alias }}{% endfor %}
+{% else %}
+  ServerAlias {{ item.value.serveralias }}
+{% endif %}
+{% endif %}

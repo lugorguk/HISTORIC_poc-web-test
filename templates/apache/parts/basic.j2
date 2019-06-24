@@ -2,6 +2,7 @@
 
   # Addressing
   ServerName {{ item.value.preferred_domain | default(item.key + '.lug.org.uk') }}
+{% include('parts/aliases.j2') %}
 
   # Contact
   ServerAdmin {{ item.value.serveradmin | default('admin@lug.org.uk') }}
@@ -13,5 +14,4 @@
   ServerSignature Off
 
 {% include('parts/lets_encrypt.j2') %}
-{% include('parts/rewrite.j2') %}
 

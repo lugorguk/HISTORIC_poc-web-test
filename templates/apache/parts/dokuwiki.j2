@@ -1,0 +1,27 @@
+  Alias /wiki/ /usr/local/share/dokuwiki/
+  <Directory /usr/local/share/dokuwiki/>
+     Require all granted
+
+     Options +MultiViews +FollowSymLinks +Indexes
+
+     php_admin_flag engine on
+     php_admin_value open_basedir /home/groups/{{ item.key }}/:/usr/local/share/dokuwiki/
+     php_admin_value doc_root /home/groups/{{ item.key }}/public_html/
+
+     SetEnv WIKI_NAME {{ item.key }}
+     SetEnv WIKI_DATA /home/groups/{{ item.key }}/dokuwiki-data/
+
+     # Rewriting rules for pretty URLs
+     RewriteEngine on
+      
+     RewriteBase /wiki
+  
+     RewriteRule ^_media/(.*)              lib/exe/fetch.php?media=$1 [QSA,L]
+     RewriteRule ^_detail/(.*)             lib/exe/detail.php?media=$1 [QSA,L]
+     RewriteRule ^_export/([^/]+)/(.*)     doku.php?do=export_$1&id=$2 [QSA,L]
+     RewriteRule ^$                        doku.php  [L]
+     RewriteCond %{REQUEST_FILENAME}       !-f
+     RewriteCond %{REQUEST_FILENAME}       !-d
+     RewriteRule (.*)                      doku.php?id=$1  [QSA,L]
+     RewriteRule ^index.php$               doku.php
+  </Directory>

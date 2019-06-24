@@ -1,0 +1,10 @@
+   ScriptAlias /wiki/ /usr/local/share/abusemod/
+   <Directory /usr/local/share/abusemod/>
+      Require all granted
+
+      Options ExecCGI
+      AcceptPathInfo Off
+      SetHandler cgi-script
+
+      SetEnv WIKI_DATA /home/groups/{{ item.key }}/abusemod-data/
+   </Directory>
