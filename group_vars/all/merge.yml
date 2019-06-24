@@ -8,17 +8,28 @@ lug_groups: |
           or var.value | type_debug == "AnsibleMapping"
         ) -%}
         {%- set group_name = var.key | regex_replace('^group_', '') -%}
-        {%- set preferred_domain = var.value.preferred_domain | default((var.value.dns_key | default(group_name)) + '.lug.org.uk') -%}
+        {%- set preferred_domain = var.value.preferred_domain | default((var.value.dns_key | default(group_name)) + (preferred_suffix | default('.lug.org.uk') ) ) -%}
+
         "{{ group_name }}": {
 
           "preferred_domain": "{{ preferred_domain }}",
+          "target": "
+           {%- if item.value.https | default(true) | bool -%}
+             {{ var.value.target | default('https://' + preferred_domain + '%{REQUEST_URI}') }}
+           {%- else -%}
+             {{ var.value.target | default('http://' + preferred_domain + '%{REQUEST_URI}') }}
+           {%- endif -%}",
 
           {%- if lugmasters[group_name] is defined -%}
             "admins": {{ lugmasters[group_name] }},
           {%- endif -%}
 
           {%- if var.value.state is not defined -%}
-            "state": "error",
+            {%- if var.value.web | default('static') == 'inactive' -%}
+              "state": "inactive",
+            {%- else -%}
+              "state": "error",
+            {%- endif -%}
           {%- endif -%}
 
           {%- if var.value.hosting is not defined -%}
@@ -31,7 +42,7 @@ lug_groups: |
 
           {%- if var.value.serveralias is not defined -%}
             "serveralias": [
-              {%- for suffix in ['.lug.org.uk','.glug.org.uk','.lugs.org.uk'] -%}
+              {%- for suffix in suffix_list | default(['.lug.org.uk','.glug.org.uk','.lugs.org.uk']) -%}
                 {%- if preferred_domain | regex_search(group_name + suffix) is none -%}
                   "{{ group_name }}{{ suffix }}",
                   "www.{{ group_name }}{{ suffix }}",
@@ -47,7 +58,7 @@ lug_groups: |
           {%- endif -%}
 
           {%- for item in var.value | dict2items -%}
-            {%- if item.key != 'preferred_domain' -%}
+            {%- if item.key != 'preferred_domain' and item.key != 'target' -%}
               "{{ item.key }}":
               {%- if item.value | type_debug not in ['dict', 'list'] -%}"{%- endif -%}
                 {{ item.value }}
