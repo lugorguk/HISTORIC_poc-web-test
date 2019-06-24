@@ -11,10 +11,18 @@
 
   - name: Install Web Server Packages
     apt:
-      name: ['apache2', 'python3-certbot-apache']
+      name: [
+        'apache2',
+        'python3-certbot-apache',
+        'libapache2-mod-php'
+      ]
       state: present
 
   - name: Ensure rewrite module is loaded in apache
     apache2_module:
-      name: rewrite
+      name: "{{ item }}"
       state: present
+    loop:
+    - rewrite
+    - proxy_fcgi
+

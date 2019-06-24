@@ -6,7 +6,16 @@
     systemd:
       name: apache2
       state: restarted
+
   tasks:
+  - name: Create LetsEncrypt web directory
+    file:
+      path: "/var/www/acme"
+      state: directory
+      owner: "root"
+      group: "root"
+      mode: '0755'
+
   - name: Read Group list
     getent:
       database: group
@@ -17,6 +26,52 @@
     getent:
       database: passwd
     register: ge_users
+
+  - name: Create group directory
+    file:
+      path: "/home/groups/"
+      state: directory
+      owner: "root"
+      group: "root"
+      mode: '0775'
+
+  - name: Create skeleton directories
+    file:
+      path: "/home/skeleton/{{ item }}"
+      state: directory
+      owner: "root"
+      group: "root"
+      mode: '0775'
+    loop:
+    - ""
+    - dokuwiki
+    - dokuwiki/public_html
+    - abusemod
+    - abusemod/public_html
+    - static
+    - static/public_html
+
+  - name: Create redirection files in the skeleton directories for wikis
+    copy:
+      dest: "/home/skeleton/{{ item.key }}/public_html/index.html"
+      owner: root
+      group: root
+      mode: '0664'
+      content: |
+        <html>
+        <head>
+        <title>Find our wiki ... over there!</title>
+        <meta http-equiv="refresh" content="0; url={{ item.value }}" />
+        </head>
+        <body>
+        <p>We have a <a href="{{ item.value }}">wiki</a></p>
+        </body>
+        </html>
+    loop:
+    - key: dokuwiki
+      value: /wiki/
+    - key: abusemod
+      value: /wiki/wiki.pl
 
   - name: Create missing group groups
     group:
@@ -33,6 +88,9 @@
     user:
       name: "{{ item.key }}"
       comment: "{{ item.value.group_name | default(item.key + ' LUG') }},,,"
+      home: "/home/groups/{{ item.key }}/"
+      password_lock: yes
+      system: yes
       group: "{{ item.key }}"
       shell: /bin/bash
       state: present
@@ -43,18 +101,72 @@
     - item.value.hosting == ansible_hostname
     - ge_users.ansible_facts.getent_passwd[item.key] is not defined
 
-  - name: Create LetsEncrypt web directory
-    file:
-      path: "/var/www/acme"
-      state: directory
-      owner: "root"
-      group: "root"
-      mode: '0755'
+  - name: Check if certificate already exists.
+    stat:
+      path: /etc/letsencrypt/live/{{ item.key }}/cert.pem
+    register: letsencrypt_cert
+    loop: "{{ lug_groups|dict2items }}"
+    loop_control:
+      label: "{{ item.key }}"
+    when:
+    - item.value.hosting == ansible_hostname
+
+  - name: Ensure apache2 is stopped if no certificates are available
+    systemd:
+      name: apache2
+      state: stopped
+    loop: "{{ letsencrypt_cert.results }}"
+    loop_control:
+      label: "{{ item.item.key }}"
+    when:
+    - item.stat.exists == false
+
+  - name: Generate new certificate if one doesn't exist.
+    shell: |
+      certbot certonly --standalone --noninteractive --agree-tos --email certificates@{{ item.item.value.preferred_domain }} -d {{ item.item.value.preferred_domain }}
+      {%- if item.item.value.serveralias | type_debug == 'list' -%}
+        {%- for alias in item.item.value.serveralias %} -d {{ alias }}{% endfor -%}
+      {%- else %} -d {{ item.item.value.serveralias }}
+      {%- endif -%}
+    loop: "{{ letsencrypt_cert.results }}"
+    loop_control:
+      label: "{{ item.item.key }}"
+    when: 
+    - item.stat.exists == false
+
+  - name: Reconfigure certbot to use the apache installer
+    lineinfile:
+      path: "/etc/letsencrypt/renewal/{{ item.item.value.preferred_domain }}.conf"
+      insertafter: "[renewalparams]"
+      regex: "^installer\\s*=\\s*"
+      line: "installer = apache"
+    loop: "{{ letsencrypt_cert.results }}"
+    loop_control:
+      label: "{{ item.item.key }}"
+    when: 
+    - item.stat.exists == false
+
+  - name: Reconfigure certbot to use the apache authenticator
+    lineinfile:
+      path: "/etc/letsencrypt/renewal/{{ item.item.value.preferred_domain }}.conf"
+      insertafter: "[renewalparams]"
+      regex: "^authenticator\\s*=\\s*"
+      line: "authenticator = apache"
+    loop: "{{ letsencrypt_cert.results }}"
+    loop_control:
+      label: "{{ item.item.key }}"
+    when: 
+    - item.stat.exists == false
+
+  - name: Ensure apache2 is started
+    systemd:
+      name: apache2
+      state: started
 
   - name: Create apache2 site-available
     template:
       dest: "/etc/apache2/sites-available/{{ item.key }}.conf"
-      src: "templates/{{ item.value.web }}.j2"
+      src: templates/apache/standard.j2
       owner: root
       group: root
       mode: 0755
@@ -64,7 +176,11 @@
     loop_control:
       label: "{{ item.key }}"
     when:
-    - item.value.web == 'static'
+    - item.value.web == 'static' or
+        item.value.web == 'php' or
+        item.value.web == 'redirect' or
+        item.value.web == 'dokuwiki' or
+        item.value.web == 'jekyll'
     - item.value.hosting == ansible_hostname
 
   - name: Create symlinks from site-available to site-enabled
@@ -76,7 +192,11 @@
     - Restart Apache
     loop: "{{ lug_groups|dict2items }}"
     loop_control:
-      label: "{{ item.key }}"
+      label: "{{ item.key }} = {{ item.value.web | default('error') }}"
     when:
-    - item.value.web == 'static'
+    - item.value.web == 'static' or
+        item.value.web == 'php' or
+        item.value.web == 'redirect' or
+        item.value.web == 'dokuwiki' or
+        item.value.web == 'jekyll'
     - item.value.hosting == ansible_hostname
